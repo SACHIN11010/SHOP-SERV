@@ -3,122 +3,143 @@
 {% block title %}{{ shop.name }} - SHOP&SERV{% endblock %}
 
 {% block content %}
-<div class="container" style="padding: 2rem 20px;">
-    <div class="shop-header" style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+<div class="container" style="padding: 2rem 20px; max-width: 1200px; margin: 0 auto;">
+    <!-- Shop Header -->
+    <div class="shop-header" style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
         {% if shop.logo %}
         <div style="flex-shrink: 0;">
             <img src="{{ url_for('static', filename='uploads/' ~ shop.logo) }}" 
-                 alt="{{ shop.name }}" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                 alt="{{ shop.name }}" style="width: 300px; height: 250px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        </div>
+        {% else %}
+        <div style="flex-shrink: 0;">
+            <div style="width: 300px; height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                🏪
+            </div>
         </div>
         {% endif %}
         
         <div style="flex: 1;">
-            <h1>{{ shop.name }}</h1>
-            <p style="color: var(--gray); font-size: 1.1rem; margin: 1rem 0;">{{ shop.description }}</p>
+            <h1 style="margin: 0 0 1rem 0; color: #333; font-size: 2rem;">{{ shop.name }}</h1>
+            <p style="color: #666; font-size: 1.1rem; margin: 1rem 0; line-height: 1.6;">{{ shop.description }}</p>
             
-            {% if shop.is_verified %}
-            <span class="badge" style="background-color: #28a745; margin-bottom: 1rem;">✓ Verified Shop</span>
-            {% endif %}
-            
-            {% if shop.service_type %}
-            <span class="badge">{{ shop.service_type }}</span>
-            {% endif %}
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;">
+                {% if shop.is_verified %}
+                <span class="badge" style="background-color: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 25px; font-size: 0.9rem;">
+                    ✓ Verified Shop
+                </span>
+                {% endif %}
+                
+                {% if shop.service_type %}
+                <span class="badge" style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 25px; font-size: 0.9rem;">
+                    {{ shop.service_type }}
+                </span>
+                {% endif %}
+            </div>
         </div>
     </div>
     
-    <div class="shop-contact" style="background: var(--light-gray); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
-        <h3 style="margin: 0 0 1rem 0; color: var(--primary);">📞 Contact Information</h3>
+    <!-- Contact Information -->
+    <div class="shop-contact" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0;">
+        <h3 style="margin: 0 0 1.5rem 0; color: #333; font-size: 1.5rem;">📞 Contact Information</h3>
         
-        {% if shop.contact_phone %}
-        <p style="margin: 0.5rem 0;">
-            <strong>📱 Phone:</strong> 
-            <a href="tel:{{ shop.contact_phone }}" style="color: var(--primary); text-decoration: none;">
-                {{ shop.contact_phone }}
-            </a>
-        </p>
-        {% endif %}
-        
-        {% if shop.contact_whatsapp %}
-        <p style="margin: 0.5rem 0;">
-            <strong>💬 WhatsApp:</strong> 
-            <a href="https://wa.me/{{ shop.contact_whatsapp.replace('-', '').replace(' ', '') }}" 
-               target="_blank" style="color: #25D366; text-decoration: none;">
-                {{ shop.contact_whatsapp }}
-            </a>
-        </p>
-        {% endif %}
-        
-        {% if shop.contact_email %}
-        <p style="margin: 0.5rem 0;">
-            <strong>📧 Email:</strong> 
-            <a href="mailto:{{ shop.contact_email }}" style="color: var(--primary); text-decoration: none;">
-                {{ shop.contact_email }}
-            </a>
-        </p>
-        {% endif %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            {% if shop.contact_phone %}
+            <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary);">
+                <p style="margin: 0; font-weight: 600; color: #333;">📱 Phone</p>
+                <a href="tel:{{ shop.contact_phone }}" style="color: var(--primary); text-decoration: none; font-size: 1.1rem;">
+                    {{ shop.contact_phone }}
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if shop.contact_whatsapp %}
+            <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #25D366;">
+                <p style="margin: 0; font-weight: 600; color: #333;">💬 WhatsApp</p>
+                <a href="https://wa.me/{{ shop.contact_whatsapp.replace('-', '').replace(' ', '') }}" 
+                   target="_blank" style="color: #25D366; text-decoration: none; font-size: 1.1rem;">
+                    {{ shop.contact_whatsapp }}
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if shop.contact_email %}
+            <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary);">
+                <p style="margin: 0; font-weight: 600; color: #333;">📧 Email</p>
+                <a href="mailto:{{ shop.contact_email }}" style="color: var(--primary); text-decoration: none; font-size: 1.1rem;">
+                    {{ shop.contact_email }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
         
         {% if shop.address %}
-        <p style="margin: 0.5rem 0;">
-            <strong>📍 Address:</strong> {{ shop.address }}
-            {% if shop.city %}, {{ shop.city }}{% endif %}
-            {% if shop.state %}, {{ shop.state }}{% endif %}
-            {% if shop.pincode %} - {{ shop.pincode }}{% endif %}
-        </p>
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0 0 0.5rem 0; font-weight: 600; color: #333;">📍 Address</p>
+            <p style="margin: 0; color: #666; line-height: 1.5;">
+                {{ shop.address }}
+                {% if shop.city %}, {{ shop.city }}{% endif %}
+                {% if shop.state %}, {{ shop.state }}{% endif %}
+                {% if shop.pincode %} - {{ shop.pincode }}{% endif %}
+            </p>
+        </div>
         {% endif %}
         
         {% if shop.opening_time and shop.closing_time %}
-        <p style="margin: 0.5rem 0;">
-            <strong>🕐 Hours:</strong> {{ shop.opening_time.strftime('%I:%M %p') }} - {{ shop.closing_time.strftime('%I:%M %p') }}
-        </p>
+        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0; font-weight: 600; color: #333;">🕐 Business Hours</p>
+            <p style="margin: 0.25rem 0 0 0; color: #666;">
+                {{ shop.opening_time.strftime('%I:%M %p') }} - {{ shop.closing_time.strftime('%I:%M %p') }}
+            </p>
+        </div>
         {% endif %}
     </div>
     
-    <div class="shop-services">
-        <h2>Services Offered</h2>
+    <!-- Services Section -->
+    <div class="shop-services" style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 2rem 0;">
+        <h2 style="margin: 0 0 1.5rem 0; color: #333; font-size: 1.5rem;">🛍️ Services Offered</h2>
         
         {% if services %}
-        <div class="products-grid">
+        <div class="grid grid-3">
             {% for service in services %}
-            <div class="product-card fade-in">
-                <a href="{{ url_for('service_detail', service_id=service.id) }}">
+            <div class="product-card fade-in" style="border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s ease;" 
+                 onmouseover="this.style.transform='translateY(-5px)'" 
+                 onmouseout="this.style.transform='translateY(0)'">
+                <a href="{{ url_for('service_detail', service_id=service.id) }}" style="text-decoration: none; color: inherit;">
                     {% if service.image %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" alt="{{ service.name }}">
+                    <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" alt="{{ service.name }}" style="width: 100%; height: 200px; object-fit: cover;">
                     {% else %}
-                    <img src="https://via.placeholder.com/300x200?text=Service" alt="{{ service.name }}">
+                    <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                        🎯
+                    </div>
                     {% endif %}
                 </a>
-                <div class="product-info">
-                    <h3>{{ service.name }}</h3>
-                    <p class="product-description">{{ service.description[:100] }}...</p>
+                <div class="product-info" style="padding: 1rem;">
+                    <h3 style="margin: 0 0 0.5rem 0; color: #333;">{{ service.name }}</h3>
+                    <p class="product-description" style="color: #666; font-size: 0.9rem; margin: 0.5rem 0; line-height: 1.4;">{{ service.description[:100] }}...</p>
                     
-                    <p style="color: var(--gray); font-size: 0.9rem; margin: 0.5rem 0;">
-                        <strong>💰 Price:</strong> ₹{{ service.price }}
-                    </p>
-                    
-                    {% if service.duration %}
-                    <p style="color: var(--gray); font-size: 0.9rem;">
-                        ⏱️ Duration: {{ service.duration }}
-                    </p>
-                    {% endif %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="color: var(--primary); font-weight: 600; font-size: 1.1rem;">₹{{ service.price }}</span>
+                        {% if service.duration %}
+                        <span style="color: #666; font-size: 0.85rem;">⏱️ {{ service.duration }}</span>
+                        {% endif %}
+                    </div>
                     
                     {% if service.category %}
-                    <span class="badge">{{ service.category }}</span>
-                    {% endif %}
-                    
-                    <div class="product-actions" style="margin-top: 1rem;">
-                        {% if current_user.is_authenticated and current_user.role == 'customer' %}
-                        <button class="btn btn-primary btn-sm add-to-cart" data-service-id="{{ service.id }}">Add to Cart</button>
-                        {% endif %}
-                        <a href="{{ url_for('service_detail', service_id=service.id) }}" class="btn btn-secondary btn-sm">View Details</a>
+                    <div style="margin-top: 0.5rem;">
+                        <span class="badge" style="background: #e9ecef; color: #495057; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">
+                            {{ service.category }}
+                        </span>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="no-results" style="text-align: center; padding: 2rem;">
-            <h3>No services available</h3>
-            <p>This shop hasn't added any services yet.</p>
+        <div style="text-align: center; padding: 3rem; background: #f8f9fa; border-radius: 12px;">
+            <h3 style="color: #666; margin: 0 0 1rem 0;">No services available</h3>
+            <p style="color: #999; margin: 0;">This shop hasn't added any services yet.</p>
         </div>
         {% endif %}
     </div>
