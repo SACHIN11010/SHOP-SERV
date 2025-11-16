@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <div class="flex-between">
+            <h1>Manage Orders</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            {% if orders %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td><strong>{{ order.order_number }}</strong></td>
+                                    <td>{{ order.customer.full_name }}</td>
+                                    <td>{{ order.items.count() }} items</td>
+                                    <td>{{ order.total_amount|format_currency }}</td>
+                                    <td>
+                                        {% if order.payment_status == 'completed' %}
+                                            <span class="badge badge-success">Paid</span>
+                                        {% elif order.payment_status == 'pending' %}
+                                            <span class="badge badge-warning">Pending</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">{{ order.payment_status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if order.status == 'delivered' %}
+                                            <span class="badge badge-success">{{ order.status|title }}</span>
+                                        {% elif order.status == 'cancelled' %}
+                                            <span class="badge badge-danger">{{ order.status|title }}</span>
+                                        {% else %}
+                                            <span class="badge badge-info">{{ order.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('order_detail', order_id=order.id) }}" 
+                                           class="btn btn-outline btn-sm">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center" style="color: var(--gray); padding: 3rem;">No orders found</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

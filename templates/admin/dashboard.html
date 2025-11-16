@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p style="color: var(--gray);">Manage the entire platform</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--success);">
+            <div class="stat-value" style="color: var(--success);">{{ total_shops }}</div>
+            <div class="stat-label">Total Shops</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--secondary);">
+            <div class="stat-value" style="color: var(--secondary);">{{ total_products }}</div>
+            <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--warning);">
+            <div class="stat-value" style="color: var(--warning);">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--info);">
+            <div class="stat-value" style="color: var(--info);">{{ total_revenue|format_currency }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="flex-between mb-3">
+                    <h2>Recent Orders</h2>
+                    <a href="{{ url_for('admin_orders') }}" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                
+                {% if recent_orders %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for order in recent_orders %}
+                            <div class="mb-2 pb-2" style="border-bottom: 1px solid var(--border);">
+                                <div class="flex-between">
+                                    <strong>{{ order.order_number }}</strong>
+                                    <span class="badge badge-info">{{ order.status|title }}</span>
+                                </div>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0.25rem 0;">
+                                    {{ order.customer.full_name }}
+                                </p>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
+                                    {{ order.total_amount|format_currency }} | {{ order.created_at.strftime('%b %d, %Y') }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center" style="color: var(--gray); padding: 2rem;">No orders yet</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="flex-between mb-3">
+                    <h2>Recent Users</h2>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                
+                {% if recent_users %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for user in recent_users %}
+                            <div class="mb-2 pb-2" style="border-bottom: 1px solid var(--border);">
+                                <div class="flex-between">
+                                    <strong>{{ user.full_name }}</strong>
+                                    <span class="badge badge-info">{{ user.role|title }}</span>
+                                </div>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0.25rem 0;">
+                                    {{ user.email }}
+                                </p>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
+                                    Joined {{ user.created_at.strftime('%b %d, %Y') }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center" style="color: var(--gray); padding: 2rem;">No users yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            <h2 class="mb-3">Quick Actions</h2>
+            <div class="flex gap-2" style="flex-wrap: wrap;">
+                <a href="{{ url_for('admin_users') }}" class="btn btn-primary">Manage Users</a>
+                <a href="{{ url_for('admin_shops') }}" class="btn btn-primary">Manage Shops</a>
+                <a href="{{ url_for('admin_products') }}" class="btn btn-primary">Manage Products</a>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-primary">Manage Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .container > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

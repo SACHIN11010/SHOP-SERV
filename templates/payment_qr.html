@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}QR Payment - SHOP&SERV{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem 20px;
+    }
+    
+    .qr-code-box {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px var(--shadow);
+    }
+    
+    .qr-code-image {
+        max-width: 300px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+    }
+    
+    .qr-code-image img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .payment-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 1rem 0;
+    }
+    
+    .payment-instructions {
+        background: var(--light);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+        text-align: left;
+    }
+    
+    .payment-instructions h4 {
+        color: var(--dark);
+        margin-bottom: 1rem;
+    }
+    
+    .payment-instructions ol {
+        margin-left: 1.5rem;
+    }
+    
+    .payment-instructions li {
+        margin: 0.5rem 0;
+        color: var(--gray);
+    }
+    
+    .confirm-button {
+        margin-top: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="dashboard-header">
+        <h1>Scan QR Code to Pay</h1>
+        <p>Order #{{ order.order_number }}</p>
+    </div>
+    
+    <div class="qr-code-box fade-in">
+        <h3>Pay with UPI</h3>
+        <div class="payment-amount">₹{{ "%.2f"|format(order.total_amount) }}</div>
+        
+        <div class="qr-code-image">
+            <img src="{{ qr_code }}" alt="UPI QR Code">
+        </div>
+        
+        <div class="payment-instructions">
+            <h4>📱 How to Pay:</h4>
+            <ol>
+                <li>Open any UPI app (Google Pay, PhonePe, Paytm, etc.)</li>
+                <li>Scan the QR code above</li>
+                <li>Verify the amount: ₹{{ "%.2f"|format(order.total_amount) }}</li>
+                <li>Complete the payment</li>
+            </ol>
+        </div>
+        
+        <div id="payment-status-box" style="margin: 2rem 0; padding: 1rem; border-radius: 8px; display: none;">
+            <p id="payment-status-message" style="margin: 0; font-weight: bold; text-align: center;"></p>
+        </div>
+        
+        <div class="confirm-button">
+            <button onclick="markAsPaid()" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">
+                ✓ I Have Completed Payment
+            </button>
+            <button onclick="cancelOrder()" class="btn btn-danger" style="width: 100%;">
+                ✗ Cancel Order
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let checkingPayment = false;
+    
+    async function markAsPaid() {
+        if (!confirm('Have you completed the UPI payment?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/confirm-qr-payment/{{ order.id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showPaymentStatus('success', '✓ Payment Completed Successfully!');
+                setTimeout(() => {
+                    window.location.href = '/order/{{ order.id }}';
+                }, 2000);
+            } else {
+                showPaymentStatus('error', '✗ Payment Not Completed');
+            }
+        } catch (error) {
+            showPaymentStatus('error', '✗ Error processing payment');
+            console.error(error);
+        }
+    }
+    
+    function showPaymentStatus(type, message) {
+        const statusBox = document.getElementById('payment-status-box');
+        const statusMessage = document.getElementById('payment-status-message');
+        
+        statusBox.style.display = 'block';
+        statusMessage.textContent = message;
+        
+        if (type === 'success') {
+            statusBox.style.backgroundColor = '#d4edda';
+            statusBox.style.borderColor = '#c3e6cb';
+            statusBox.style.color = '#155724';
+        } else {
+            statusBox.style.backgroundColor = '#f8d7da';
+            statusBox.style.borderColor = '#f5c6cb';
+            statusBox.style.color = '#721c24';
+        }
+    }
+    
+    async function checkPaymentStatus() {
+        if (checkingPayment) return;
+        
+        try {
+            const response = await fetch('/check-payment-status/{{ order.id }}');
+            const data = await response.json();
+            
+            if (data.payment_status === 'completed') {
+                showPaymentStatus('success', '✓ Payment Completed Successfully!');
+                setTimeout(() => {
+                    window.location.href = '/order/{{ order.id }}';
+                }, 2000);
+            } else if (data.payment_status === 'pending') {
+                // Payment still pending, continue checking
+                setTimeout(checkPaymentStatus, 5000); // Check every 5 seconds
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error);
+        }
+    }
+    
+    async function cancelOrder() {
+        if (!confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/cancel-order/{{ order.id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Order cancelled successfully.');
+                window.location.href = '/customer/dashboard';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+            console.error(error);
+        }
+    }
+    
+    // Start checking payment status when page loads
+    window.addEventListener('load', function() {
+        setTimeout(checkPaymentStatus, 5000); // Start checking after 5 seconds
+    });
+</script>
+{% endblock %}

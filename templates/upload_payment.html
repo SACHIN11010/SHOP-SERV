@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Upload Payment Proof - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Upload Payment Proof</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Order #{{ order.order_number }}</h5>
+                        <p class="mb-0">Total Amount: {{ order.total_amount|format_currency }}</p>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <h5>Please make payment to:</h5>
+                        <div class="qr-code-container mb-3">
+                            <!-- Replace with your actual QR code image -->
+                            <img src="{{ url_for('static', filename='img/qr-code-placeholder.png') }}" 
+                                 alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                        </div>
+                        <p class="mb-1">Bank: Demo Bank</p>
+                        <p class="mb-1">Account Number: 1234 5678 9012 3456</p>
+                        <p class="mb-1">Account Name: Your Shop Name</p>
+                    </div>
+                    
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_payment', order_id=order.id) }}">
+                        <div class="mb-3">
+                            <label for="payment_proof" class="form-label">Upload Payment Proof (Screenshot/Photo)</label>
+                            <input class="form-control" type="file" id="payment_proof" name="payment_proof" accept="image/*" required>
+                            <div class="form-text">Please upload a clear image of your payment confirmation.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>Upload Proof
+                            </button>
+                            <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Order
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

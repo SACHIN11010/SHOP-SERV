@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; padding: 2rem 20px;">
+    <div class="card fade-in">
+        <div class="card-body" style="padding: 2rem;">
+            <h2 class="text-center mb-3">Verify OTP</h2>
+            <p class="text-center mb-3" style="color: var(--gray);">Enter the 6-digit code sent to your email</p>
+            
+            <form method="POST" action="{{ url_for('verify_otp_route') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.otp.label(class="form-label") }}
+                    {{ form.otp(class="form-control", placeholder="Enter 6-digit OTP", maxlength="6", style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;") }}
+                    {% if form.otp.errors %}
+                        <div class="form-error">{{ form.otp.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Verify OTP</button>
+            </form>
+            
+            <p class="text-center mt-3" style="color: var(--gray);">
+                Didn't receive the code? <a href="{{ url_for('forgot_password') }}" style="color: var(--primary);">Resend OTP</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Home - SHOP&SERV{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1 class="fade-in">Welcome to SHOP&SERV</h1>
+        <p class="fade-in">Your trusted local marketplace for products and services</p>
+        <div class="fade-in">
+            <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">Browse Products</a>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline btn-lg">Get Started</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="container" style="padding: 4rem 20px;">
+    <h2 class="text-center mb-4">Featured Products</h2>
+    
+    {% if products %}
+        <div class="grid grid-3">
+            {% for product in products %}
+                <div class="card product-card fade-in">
+                    {% if product.image %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}" alt="{{ product.name }}" class="card-img">
+                    {% else %}
+                        <div class="card-img" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                            📦
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h3 class="card-title">{{ product.name }}</h3>
+                        <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                        <div class="flex-between">
+                            <span class="product-price">{{ product.price|format_currency }}</span>
+                            <span class="product-stock">Stock: {{ product.stock }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer flex-between">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-outline btn-sm">View Details</a>
+                        {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                            <button onclick="addToCart({{ product.id }})" class="btn btn-primary btn-sm">Add to Cart</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center" style="color: var(--gray); padding: 3rem;">No products available yet.</p>
+    {% endif %}
+    
+    <div class="text-center mt-4">
+        <a href="{{ url_for('products') }}" class="btn btn-primary">View All Products</a>
+    </div>
+</section>
+
+<section style="background: white; padding: 4rem 0;">
+    <div class="container">
+        <h2 class="text-center mb-4">Why Choose SHOP&SERV?</h2>
+        <div class="grid grid-3">
+            <div class="text-center p-3">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
+                <h3>Wide Selection</h3>
+                <p style="color: var(--gray);">Browse products from multiple local shops in one place</p>
+            </div>
+            <div class="text-center p-3">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                <h3>Secure Payments</h3>
+                <p style="color: var(--gray);">Safe and secure payment processing with Stripe</p>
+            </div>
+            <div class="text-center p-3">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🚚</div>
+                <h3>Fast Delivery</h3>
+                <p style="color: var(--gray);">Quick delivery from local shops to your doorstep</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

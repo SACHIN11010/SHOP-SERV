@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}QR Payment - SHOP&SERV{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem 20px;
+    }
+    
+    .qr-code-box {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px var(--shadow);
+    }
+    
+    .qr-code-image {
+        max-width: 300px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+    }
+    
+    .qr-code-image img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .payment-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 1rem 0;
+    }
+    
+    .payment-instructions {
+        background: var(--light);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+        text-align: left;
+    }
+    
+    .payment-instructions h4 {
+        color: var(--dark);
+        margin-bottom: 1rem;
+    }
+    
+    .payment-instructions ol {
+        margin-left: 1.5rem;
+    }
+    
+    .payment-instructions li {
+        margin: 0.5rem 0;
+        color: var(--gray);
+    }
+    
+    .confirm-button {
+        margin-top: 2rem;
+    }
+    
+    #paymentStatus {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+        background-color: #e7f5ff;
+        border: 1px solid #d0ebff;
+        color: #1864ab;
+    }
+    
+    .alert-success {
+        background-color: #ebfbee;
+        border: 1px solid #d3f9d8;
+        color: #2b8a3e;
+    }
+    
+    .alert-warning {
+        background-color: #fff9db;
+        border: 1px solid #ffec99;
+        color: #e67700;
+    }
+    
+    .alert-danger {
+        background-color: #fff5f5;
+        border: 1px solid #ffc9c9;
+        color: #c92a2a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="dashboard-header">
+        <h1>Scan QR Code to Pay</h1>
+        <p>Order #{{ order.order_number }}</p>
+    </div>
+    
+    <div class="qr-code-box fade-in">
+        <h3>Pay with UPI</h3>
+        <div class="payment-amount">₹{{ "%.2f"|format(order.total_amount) }}</div>
+        
+        <div class="qr-code-image">
+            <img src="{{ qr_code }}" alt="UPI QR Code">
+        </div>
+        
+        <div class="payment-instructions">
+            <h4>📱 How to Pay:</h4>
+            <ol>
+                <li>Open any UPI app (Google Pay, PhonePe, Paytm, etc.)</li>
+                <li>Scan the QR code above</li>
+                <li>Verify the amount: ₹{{ "%.2f"|format(order.total_amount) }}</li>
+                <li>Complete the payment</li>
+            </ol>
+        </div>
+        
+        <div id="paymentStatus">
+            <div class="alert alert-info">
+                Please complete the payment using your UPI app. We'll verify it automatically.
+            </div>
+        </div>
+        
+        <div class="confirm-button">
+            <button onclick="cancelOrder()" class="btn btn-danger" style="width: 100%;">
+                ✗ Cancel Order
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let checkingPayment = false;
+    const startTime = Math.floor(Date.now() / 1000);
+    const TIME_LIMIT = 300; // 5 minutes in seconds
+    
+    function showPaymentStatus(type, message) {
+        const statusDiv = document.getElementById('paymentStatus');
+        if (!statusDiv) return;
+        
+        // Create alert HTML based on type
+        let alertClass = 'alert-info';
+        if (type === 'success') alertClass = 'alert-success';
+        else if (type === 'warning') alertClass = 'alert-warning';
+        else if (type === 'error') alertClass = 'alert-danger';
+        
+        statusDiv.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    }
+    
+    async function checkPaymentStatus() {
+        if (checkingPayment) return;
+        checkingPayment = true;
+        
+        try {
+            const response = await fetch('/check-payment-status/{{ order.id }}');
+            const data = await response.json();
+            
+            if (data.payment_status === 'completed') {
+                showPaymentStatus('success', '✅ Payment successful! Redirecting to your dashboard...');
+                // Redirect to customer dashboard after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("customer_dashboard") }}';
+                }, 2000);
+                return; // Stop further checks
+            } else {
+                // Show payment pending status with countdown
+                const currentTime = Math.floor(Date.now() / 1000);
+                const elapsed = currentTime - startTime;
+                const remaining = Math.max(0, TIME_LIMIT - elapsed);
+                
+                if (remaining > 0) {
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = remaining % 60;
+                    showPaymentStatus('info', 
+                        `⏳ Waiting for payment confirmation... (${minutes}:${seconds.toString().padStart(2, '0')} remaining)`);
+                    
+                    // Continue checking
+                    setTimeout(checkPaymentStatus, 2000);
+                } else {
+                    showPaymentStatus('warning', '⏱️ Payment session expired. Please try the payment again.');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error);
+            showPaymentStatus('warning', '⚠️ Error checking payment status. Please check your connection.');
+            // Retry after delay
+            setTimeout(checkPaymentStatus, 5000);
+        } finally {
+            checkingPayment = false;
+        }
+    }
+    
+    async function cancelOrder() {
+        if (!confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/cancel-order/{{ order.id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showPaymentStatus('success', 'Order cancelled successfully. Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("customer_dashboard") }}';
+                }, 1500);
+            } else {
+                showPaymentStatus('error', 'Error: ' + (data.message || 'Failed to cancel order'));
+            }
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            showPaymentStatus('error', 'An error occurred. Please try again.');
+        }
+    }
+    
+    // Start checking payment status immediately
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial check after 5 seconds to give user time to make payment
+        setTimeout(checkPaymentStatus, 5000);
+    });
+</script>
+{% endblock %}

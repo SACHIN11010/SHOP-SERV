@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; padding: 2rem 20px;">
+    <div class="card fade-in">
+        <div class="card-body" style="padding: 2rem;">
+            <h2 class="text-center mb-3">Login</h2>
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", placeholder="Enter your email") }}
+                    {% if form.email.errors %}
+                        <div class="form-error">{{ form.email.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    <div style="position: relative;">
+                        {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
+                        <button type="button" onclick="togglePassword('password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray); font-size: 1.2rem;">
+                            👁️
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="form-error">{{ form.password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="text-right mb-3">
+                    <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); font-size: 0.9rem;">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+            
+            <p class="text-center mt-3" style="color: var(--gray);">
+                Don't have an account? <a href="{{ url_for('register') }}" style="color: var(--primary);">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function togglePassword(fieldId, button) {
+        const field = document.getElementById(fieldId);
+        if (field.type === 'password') {
+            field.type = 'text';
+            button.innerHTML = '🙈';
+        } else {
+            field.type = 'password';
+            button.innerHTML = '👁️';
+        }
+    }
+</script>
+{% endblock %}

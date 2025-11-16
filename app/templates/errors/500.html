@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white px-4 py-16 sm:px-6 sm:py-24 md:grid md:place-items-center lg:px-8">
+    <div class="mx-auto max-w-max">
+        <main class="sm:flex">
+            <p class="text-4xl font-extrabold text-indigo-600 sm:text-5xl">500</p>
+            <div class="sm:ml-6">
+                <div class="sm:border-l sm:border-gray-200 sm:pl-6">
+                    <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">Something went wrong</h1>
+                    <p class="mt-1 text-base text-gray-500">
+                        We're sorry, but something went wrong on our end. Our team has been notified and we're working to fix it.
+                    </p>
+                    {% if error %}
+                    <div class="mt-4 p-4 bg-red-50 rounded-md">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="h-5 w-5 text-red-400 fas fa-exclamation-circle"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error Details</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>{{ error }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="mt-10 flex space-x-3 sm:border-l sm:border-transparent sm:pl-6">
+                    <a href="{{ url_for('main.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Go back home
+                    </a>
+                    <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Contact support
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

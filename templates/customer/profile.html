@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>My Profile</h1>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('customer_profile') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                    <small style="color: var(--gray);">Email cannot be changed</small>
+                </div>
+                
+                <div class="form-group">
+                    {{ form.full_name.label(class="form-label") }}
+                    {{ form.full_name(class="form-control") }}
+                    {% if form.full_name.errors %}
+                        <div class="form-error">{{ form.full_name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.phone.label(class="form-label") }}
+                    {{ form.phone(class="form-control") }}
+                    {% if form.phone.errors %}
+                        <div class="form-error">{{ form.phone.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Account Type</label>
+                    <input type="text" class="form-control" value="{{ current_user.role|title }}" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Member Since</label>
+                    <input type="text" class="form-control" value="{{ current_user.created_at.strftime('%B %d, %Y') }}" disabled>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Update Profile</button>
+            </form>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+            
+            <div class="text-center">
+                <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

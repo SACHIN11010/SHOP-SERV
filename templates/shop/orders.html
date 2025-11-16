@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Shop Orders - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Orders</h1>
+        <p style="color: var(--gray);">Manage orders for your products</p>
+    </div>
+    
+    {% if order_items %}
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Product</th>
+                                <th>Customer</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                                <tr>
+                                    <td><strong>{{ item.order.order_number }}</strong></td>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.order.customer.full_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ (item.price * item.quantity)|format_currency }}</td>
+                                    <td>
+                                        {% if item.order.status == 'delivered' %}
+                                            <span class="badge badge-success">{{ item.order.status|title }}</span>
+                                        {% elif item.order.status == 'cancelled' %}
+                                            <span class="badge badge-danger">{{ item.order.status|title }}</span>
+                                        {% else %}
+                                            <span class="badge badge-info">{{ item.order.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.order.created_at.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        <select onchange="updateOrderStatus({{ item.order.id }}, this.value)" 
+                                                class="form-control" style="min-width: 120px;">
+                                            <option value="">Update Status</option>
+                                            <option value="confirmed">Confirmed</option>
+                                            <option value="processing">Processing</option>
+                                            <option value="shipped">Shipped</option>
+                                            <option value="delivered">Delivered</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center" style="padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+                <h2>No orders yet</h2>
+                <p style="color: var(--gray); margin: 1rem 0;">Orders will appear here when customers purchase your products</p>
+                <a href="{{ url_for('shop_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Shop Dashboard - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <div class="flex-between">
+            <div>
+                <h1>{{ shop.name }}</h1>
+                <p style="color: var(--gray);">Manage your shop and products</p>
+            </div>
+            <a href="{{ url_for('edit_shop') }}" class="btn btn-outline">Edit Shop</a>
+        </div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_products }}</div>
+            <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--success);">
+            <div class="stat-value" style="color: var(--success);">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--secondary);">
+            <div class="stat-value" style="color: var(--secondary);">{{ total_revenue|format_currency }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+    
+    <div class="quick-actions" style="margin: 2rem 0;">
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary">+ Add Product</a>
+        <a href="{{ url_for('add_service') }}" class="btn btn-primary">+ Add Service</a>
+        <a href="{{ url_for('shop_products') }}" class="btn btn-outline">Manage Products</a>
+        <a href="{{ url_for('shop_services') }}" class="btn btn-outline">Manage Services</a>
+        <a href="{{ url_for('shop_orders') }}" class="btn btn-outline">View Orders</a>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="flex-between mb-3">
+                    <h2>Products</h2>
+                    <a href="{{ url_for('add_product') }}" class="btn btn-primary btn-sm">Add Product</a>
+                </div>
+                
+                {% if products %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for product in products[:5] %}
+                            <div class="flex-between mb-2 pb-2" style="border-bottom: 1px solid var(--border);">
+                                <div>
+                                    <strong>{{ product.name }}</strong>
+                                    <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
+                                        {{ product.price|format_currency }} | Stock: {{ product.stock }}
+                                    </p>
+                                </div>
+                                {% if product.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ url_for('shop_products') }}" class="btn btn-outline btn-sm mt-2" style="width: 100%;">
+                        View All Products
+                    </a>
+                {% else %}
+                    <p class="text-center" style="color: var(--gray); padding: 2rem;">No products yet</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="flex-between mb-3">
+                    <h2>Recent Orders</h2>
+                    <a href="{{ url_for('shop_orders') }}" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                
+                {% if orders %}
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        {% for item in orders %}
+                            <div class="mb-2 pb-2" style="border-bottom: 1px solid var(--border);">
+                                <div class="flex-between">
+                                    <strong>{{ item.product.name }}</strong>
+                                    <span class="badge badge-info">{{ item.order.status|title }}</span>
+                                </div>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0.25rem 0;">
+                                    Order #{{ item.order.order_number }}
+                                </p>
+                                <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
+                                    Qty: {{ item.quantity }} | {{ (item.price * item.quantity)|format_currency }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center" style="color: var(--gray); padding: 2rem;">No orders yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            <h2 class="mb-3">Shop Information</h2>
+            
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 2rem;">
+                {% if shop.logo %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ shop.logo) }}" alt="{{ shop.name }}" 
+                         style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px;">
+                {% else %}
+                    <div style="width: 150px; height: 150px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                        🏪
+                    </div>
+                {% endif %}
+                
+                <div>
+                    <p><strong>Description:</strong></p>
+                    <p style="color: var(--gray);">{{ shop.description or 'No description provided.' }}</p>
+                    
+                    {% if shop.address %}
+                        <p class="mt-2"><strong>Address:</strong></p>
+                        <p style="color: var(--gray);">{{ shop.address }}</p>
+                    {% endif %}
+                    
+                    <p class="mt-2">
+                        <strong>Status:</strong>
+                        {% if shop.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .container > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

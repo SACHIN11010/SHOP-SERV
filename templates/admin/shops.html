@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Shops - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <div class="flex-between">
+            <h1>Manage Shops</h1>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            {% if shops %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Shop Name</th>
+                                <th>Owner</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shop in shops %}
+                                <tr>
+                                    <td>{{ shop.id }}</td>
+                                    <td>
+                                        <div class="flex gap-2" style="align-items: center;">
+                                            {% if shop.logo %}
+                                                <img src="{{ url_for('static', filename='uploads/' ~ shop.logo) }}" 
+                                                     alt="{{ shop.name }}" 
+                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
+                                            {% endif %}
+                                            <strong>{{ shop.name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ shop.owner.full_name }}</td>
+                                    <td>{{ shop.products.count() }}</td>
+                                    <td>
+                                        {% if shop.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Disabled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ shop.created_at.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        <button onclick="toggleShop({{ shop.id }})" 
+                                                class="btn {% if shop.is_active %}btn-danger{% else %}btn-success{% endif %} btn-sm">
+                                            {% if shop.is_active %}Disable{% else %}Enable{% endif %}
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center" style="color: var(--gray); padding: 3rem;">No shops found</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

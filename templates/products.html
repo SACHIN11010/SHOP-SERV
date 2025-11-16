@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Products - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Browse Products</h1>
+        
+        <div class="flex gap-2 mt-3" style="flex-wrap: wrap;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search products..." value="{{ search }}" style="flex: 1; min-width: 250px;">
+            
+            <select id="categorySelect" class="form-control" style="max-width: 200px;">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            
+            <button onclick="filterProducts()" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+    
+    {% if products %}
+        <div class="grid grid-3">
+            {% for product in products %}
+                <div class="card product-card fade-in">
+                    {% if product.stock < 10 %}
+                        <span class="product-badge">Low Stock</span>
+                    {% endif %}
+                    
+                    {% if product.image %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}" alt="{{ product.name }}" class="card-img">
+                    {% else %}
+                        <div class="card-img" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                            📦
+                        </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h3 class="card-title">{{ product.name }}</h3>
+                        {% if product.category %}
+                            <span class="badge badge-info mb-2">{{ product.category }}</span>
+                        {% endif %}
+                        <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                        <p style="color: var(--gray); font-size: 0.9rem;">
+                            <strong>Shop:</strong> {{ product.shop.name }}
+                        </p>
+                        <div class="flex-between">
+                            <span class="product-price">{{ product.price|format_currency }}</span>
+                            <span class="product-stock">Stock: {{ product.stock }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer flex-between">
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-outline btn-sm">View Details</a>
+                        {% if current_user.is_authenticated and current_user.role == 'customer' and product.stock > 0 %}
+                            <button onclick="addToCart({{ product.id }})" class="btn btn-primary btn-sm">Add to Cart</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center" style="padding: 3rem;">
+                <p style="color: var(--gray); font-size: 1.2rem;">No products found.</p>
+                <a href="{{ url_for('products') }}" class="btn btn-primary mt-2">View All Products</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

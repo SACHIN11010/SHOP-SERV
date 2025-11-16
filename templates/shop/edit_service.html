@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Service - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Edit Service</h1>
+        <a href="{{ url_for('shop_services') }}" class="btn btn-secondary">← Back to Services</a>
+    </div>
+    
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data" class="form-card">
+            {{ form.hidden_tag() }}
+            
+            {% if service.image %}
+            <div class="form-group">
+                <label class="form-label">Current Image</label>
+                <div>
+                    <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" 
+                         alt="{{ service.name }}" style="max-width: 200px; border-radius: 8px;">
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-control") }}
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control", rows=4) }}
+                {% if form.description.errors %}
+                <div class="form-error">{{ form.description.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form.price.label(class="form-label") }}
+                    {{ form.price(class="form-control", step="0.01") }}
+                    {% if form.price.errors %}
+                    <div class="form-error">{{ form.price.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.duration.label(class="form-label") }}
+                    {{ form.duration(class="form-control", placeholder="e.g., 1 hour, 30 minutes") }}
+                    {% if form.duration.errors %}
+                    <div class="form-error">{{ form.duration.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.category.label(class="form-label") }}
+                {{ form.category(class="form-control", placeholder="e.g., Cleaning, Repair, Beauty") }}
+                {% if form.category.errors %}
+                <div class="form-error">{{ form.category.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control") }}
+                <small class="form-text">Leave empty to keep current image</small>
+                {% if form.image.errors %}
+                <div class="form-error">{{ form.image.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg">Update Service</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="card fade-in">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem;">
+            <div>
+                {% if product.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ product.image) }}" alt="{{ product.name }}" style="width: 100%; border-radius: 12px;">
+                {% else %}
+                    <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem;">
+                        📦
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h1>{{ product.name }}</h1>
+                
+                {% if product.category %}
+                    <span class="badge badge-info mb-2">{{ product.category }}</span>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <span class="product-price" style="font-size: 2rem;">{{ product.price|format_currency }}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Stock:</strong> 
+                    {% if product.stock > 0 %}
+                        <span style="color: var(--success);">{{ product.stock }} available</span>
+                    {% else %}
+                        <span style="color: var(--danger);">Out of stock</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Shop:</strong> {{ product.shop.name }}
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Description:</strong>
+                    <p style="color: var(--gray); margin-top: 0.5rem;">{{ product.description or 'No description available.' }}</p>
+                </div>
+                
+                {% if current_user.is_authenticated and current_user.role == 'customer' and product.stock > 0 %}
+                    <button onclick="addToCart({{ product.id }})" class="btn btn-primary btn-lg" style="width: 100%;">
+                        Add to Cart
+                    </button>
+                {% elif not current_user.is_authenticated %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg" style="width: 100%;">
+                        Login to Purchase
+                    </a>
+                {% endif %}
+                
+                <a href="{{ url_for('products') }}" class="btn btn-outline mt-2" style="width: 100%;">
+                    Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .card > div {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

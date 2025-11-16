@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Shops - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Our Shops</h1>
+    
+    <div class="row">
+        {% if shops %}
+            {% for shop in shops %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if shop.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ shop.image) }}" class="card-img-top" alt="{{ shop.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="text-center py-5 bg-light">
+                        <i class="fas fa-store fa-5x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ shop.name }}</h5>
+                        <p class="card-text">{{ shop.description|truncate(100) }}</p>
+                        <p class="text-muted">
+                            <i class="fas fa-map-marker-alt"></i> {{ shop.address }}
+                            {% if shop.city %}, {{ shop.city }}{% endif %}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="#" class="btn btn-primary">View Shop</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">No shops available at the moment.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

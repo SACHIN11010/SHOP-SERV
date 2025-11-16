@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Add Product - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Add New Product</h1>
+    </div>
+    
+    <div class="card fade-in">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_product') }}" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", placeholder="Enter product name") }}
+                    {% if form.name.errors %}
+                        <div class="form-error">{{ form.name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="4", placeholder="Describe your product") }}
+                    {% if form.description.errors %}
+                        <div class="form-error">{{ form.description.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        {{ form.price.label(class="form-label") }}
+                        {{ form.price(class="form-control", placeholder="0.00", step="0.01") }}
+                        {% if form.price.errors %}
+                            <div class="form-error">{{ form.price.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.stock.label(class="form-label") }}
+                        {{ form.stock(class="form-control", placeholder="0") }}
+                        {% if form.stock.errors %}
+                            <div class="form-error">{{ form.stock.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form.category.label(class="form-label") }}
+                    {{ form.category(class="form-control", placeholder="e.g., Electronics, Clothing, Food") }}
+                    {% if form.category.errors %}
+                        <div class="form-error">{{ form.category.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    {{ form.image.label(class="form-label") }}
+                    {{ form.image(class="form-control") }}
+                    {% if form.image.errors %}
+                        <div class="form-error">{{ form.image.errors[0] }}</div>
+                    {% endif %}
+                    <small style="color: var(--gray);">Recommended: High-quality image, max 16MB</small>
+                </div>
+                
+                <div id="imagePreviewContainer" style="display: none; margin-top: 1rem;">
+                    <img id="imagePreview" style="max-width: 100%; border-radius: 8px;">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">
+                    Add Product
+                </button>
+            </form>
+            
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+            
+            <div class="text-center">
+                <a href="{{ url_for('shop_products') }}" class="btn btn-outline">Back to Products</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                const container = document.getElementById('imagePreviewContainer');
+                preview.src = e.target.result;
+                container.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

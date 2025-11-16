@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ service.name }} - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="product-detail-container">
+        <div class="product-detail-image">
+            {% if service.image %}
+            <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" alt="{{ service.name }}">
+            {% else %}
+            <img src="https://via.placeholder.com/500x400?text=Service" alt="{{ service.name }}">
+            {% endif %}
+        </div>
+        
+        <div class="product-detail-info">
+            <h1>{{ service.name }}</h1>
+            
+            {% if service.category %}
+            <span class="badge" style="margin-bottom: 1rem;">{{ service.category }}</span>
+            {% endif %}
+            
+            <div class="product-price" style="font-size: 2rem; margin: 1rem 0;">
+                {{ service.price|format_currency }}
+            </div>
+            
+            {% if service.duration %}
+            <p style="color: var(--gray); margin: 0.5rem 0;">
+                <strong>⏱️ Duration:</strong> {{ service.duration }}
+            </p>
+            {% endif %}
+            
+            <p style="color: var(--gray); margin: 0.5rem 0;">
+                <strong>🏪 Provider:</strong> {{ service.shop.name }}
+            </p>
+            
+            <div class="product-description" style="margin: 2rem 0;">
+                <h3>About this Service</h3>
+                <p>{{ service.description }}</p>
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.role == 'customer' %}
+            <button onclick="addServiceToCart({{ service.id }})" class="btn btn-primary btn-lg" style="width: 100%;">
+                Add to Cart
+            </button>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg" style="width: 100%;">
+                Login to Book
+            </a>
+            {% endif %}
+            
+            <a href="{{ url_for('services') }}" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+                ← Back to Services
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function addServiceToCart(serviceId) {
+        try {
+            const response = await fetch(`/cart/add-service/${serviceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Service added to cart!');
+                updateCartCount(data.cart_count);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+            console.error(error);
+        }
+    }
+    
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'block' : 'none';
+        }
+    }
+</script>
+{% endblock %}

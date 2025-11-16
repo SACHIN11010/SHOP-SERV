@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Shop - {{ shop.name }} | SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="fas fa-store me-2"></i> Edit Shop: {{ shop.name }}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row g-4">
+                            <!-- Basic Information -->
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.name.label(class="form-label fw-bold") }}
+                                    {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                                    {% for error in form.name.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.service_type.label(class="form-label fw-bold") }}
+                                    {{ form.service_type(class="form-select" + (" is-invalid" if form.service_type.errors else "")) }}
+                                    {% for error in form.service_type.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-group">
+                                    {{ form.description.label(class="form-label fw-bold") }}
+                                    {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="3") }}
+                                    {% for error in form.description.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-group">
+                                    {{ form.logo.label(class="form-label fw-bold") }}
+                                    {% if shop.logo %}
+                                        <div class="mb-2">
+                                            <img src="{{ url_for('static', filename='uploads/' ~ shop.logo) }}" 
+                                                 alt="{{ shop.name }}" 
+                                                 class="img-thumbnail" 
+                                                 style="max-height: 120px;">
+                                            <div class="form-text">Current logo</div>
+                                        </div>
+                                    {% endif %}
+                                    {{ form.logo(class="form-control" + (" is-invalid" if form.logo.errors else "")) }}
+                                    <div class="form-text">Leave blank to keep current logo</div>
+                                    {% for error in form.logo.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Location Information -->
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3">Location Information</h5>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="form-group">
+                                    {{ form.address.label(class="form-label fw-bold") }}
+                                    {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), rows="2") }}
+                                    {% for error in form.address.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.city.label(class="form-label fw-bold") }}
+                                    {{ form.city(class="form-control" + (" is-invalid" if form.city.errors else "")) }}
+                                    {% for error in form.city.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.state.label(class="form-label fw-bold") }}
+                                    {{ form.state(class="form-control" + (" is-invalid" if form.state.errors else "")) }}
+                                    {% for error in form.state.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.pincode.label(class="form-label fw-bold") }}
+                                    {{ form.pincode(class="form-control" + (" is-invalid" if form.pincode.errors else "")) }}
+                                    {% for error in form.pincode.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3">Contact Information</h5>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.contact_phone.label(class="form-label fw-bold") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        {{ form.contact_phone(class="form-control" + (" is-invalid" if form.contact_phone.errors else "")) }}
+                                    </div>
+                                    {% for error in form.contact_phone.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.contact_whatsapp.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fab fa-whatsapp text-success"></i></span>
+                                        {{ form.contact_whatsapp(class="form-control" + (" is-invalid" if form.contact_whatsapp.errors else "")) }}
+                                    </div>
+                                    <div class="form-text">Optional: For customer support</div>
+                                    {% for error in form.contact_whatsapp.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.contact_email.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else "")) }}
+                                    </div>
+                                    <div class="form-text">Optional: For order notifications</div>
+                                    {% for error in form.contact_email.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Business Hours -->
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3">Business Hours</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.opening_time.label(class="form-label fw-bold") }}
+                                    {{ form.opening_time(class="form-control" + (" is-invalid" if form.opening_time.errors else "")) }}
+                                    <div class="form-text">Format: HH:MM (24-hour format)</div>
+                                    {% for error in form.opening_time.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.closing_time.label(class="form-label fw-bold") }}
+                                    {{ form.closing_time(class="form-control" + (" is-invalid" if form.closing_time.errors else "")) }}
+                                    <div class="form-text">Format: HH:MM (24-hour format)</div>
+                                    {% for error in form.closing_time.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Delivery Settings -->
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3">Delivery Settings</h5>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.is_delivery_available(class="form-check-input", role="switch") }}
+                                    {{ form.is_delivery_available.label(class="form-check-label fw-bold") }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    {{ form.delivery_radius_km.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.delivery_radius_km(class="form-control" + (" is-invalid" if form.delivery_radius_km.errors else "")) }}
+                                        <span class="input-group-text">km</span>
+                                    </div>
+                                    <div class="form-text">Maximum delivery distance</div>
+                                    {% for error in form.delivery_radius_km.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.delivery_charge.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.delivery_charge(class="form-control" + (" is-invalid" if form.delivery_charge.errors else "")) }}
+                                    </div>
+                                    <div class="form-text">Delivery fee for orders</div>
+                                    {% for error in form.delivery_charge.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="form-group mt-3">
+                                    {{ form.min_order_amount.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.min_order_amount(class="form-control" + (" is-invalid" if form.min_order_amount.errors else "")) }}
+                                    </div>
+                                    <div class="form-text">Minimum order for delivery</div>
+                                    {% for error in form.min_order_amount.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.is_pickup_available(class="form-check-input", role="switch") }}
+                                    {{ form.is_pickup_available.label(class="form-check-label fw-bold") }}
+                                </div>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.is_cod_available(class="form-check-input", role="switch") }}
+                                    {{ form.is_cod_available.label(class="form-check-label fw-bold") }}
+                                </div>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.is_active(class="form-check-input", role="switch") }}
+                                    {{ form.is_active.label(class="form-check-label fw-bold") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Information -->
+                        <div class="col-12 mt-4">
+                            <h5 class="border-bottom pb-2 mb-3">Payment Information</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Configure how you'd like to receive payments from customers.
+                            </div>
+                            
+                            <!-- Preferred Payment Method -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        {{ form.preferred_payment_method.label(class="form-label fw-bold") }}
+                                        {{ form.preferred_payment_method(class="form-select" + (" is-invalid" if form.preferred_payment_method.errors else "")) }}
+                                        {% for error in form.preferred_payment_method.errors %}
+                                            <div class="invalid-feedback">{{ error }}</div>
+                                        {% endfor %}
+                                        <small class="form-text text-muted">
+                                            Select how you want to receive payments from customers.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- UPI Payment Section -->
+                            <div id="upi-section" class="mb-4">
+                                <h6 class="border-bottom pb-2 mb-3">UPI Payment Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.upi_id.label(class="form-label") }}
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                                                {{ form.upi_id(class="form-control" + (" is-invalid" if form.upi_id.errors else ""), placeholder="username@upi") }}
+                                            </div>
+                                            {% for error in form.upi_id.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                            <small class="form-text text-muted">Your UPI ID for receiving payments (e.g., username@upi)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.upi_qr_code.label(class="form-label") }}
+                                            {{ form.upi_qr_code(class="form-control" + (" is-invalid" if form.upi_qr_code.errors else "")) }}
+                                            {% if shop.upi_qr_code %}
+                                                <div class="mt-2">
+                                                    <img src="{{ url_for('static', filename=shop.upi_qr_code) }}" alt="UPI QR Code" class="img-thumbnail mt-2" style="max-height: 150px;">
+                                                    <div class="form-check mt-2">
+                                                        <input class="form-check-input" type="checkbox" name="remove_qr_code" id="remove_qr_code">
+                                                        <label class="form-check-label" for="remove_qr_code">
+                                                            Remove current QR code
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% for error in form.upi_qr_code.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                            <small class="form-text text-muted">Upload your UPI QR code (optional if UPI ID is provided)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Bank Transfer Section -->
+                            <div id="bank-section" class="mb-4">
+                                <h6 class="border-bottom pb-2 mb-3">Bank Transfer Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.bank_name.label(class="form-label") }}
+                                            {{ form.bank_name(class="form-control" + (" is-invalid" if form.bank_name.errors else "")) }}
+                                            {% for error in form.bank_name.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.account_holder_name.label(class="form-label") }}
+                                            {{ form.account_holder_name(class="form-control" + (" is-invalid" if form.account_holder_name.errors else "")) }}
+                                            {% for error in form.account_holder_name.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.account_number.label(class="form-label") }}
+                                            {{ form.account_number(class="form-control" + (" is-invalid" if form.account_number.errors else ""), placeholder="e.g., 1234567890") }}
+                                            {% for error in form.account_number.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.ifsc_code.label(class="form-label") }}
+                                            {{ form.ifsc_code(class="form-control text-uppercase" + (" is-invalid" if form.ifsc_code.errors else ""), placeholder="e.g., HDFC0001234") }}
+                                            {% for error in form.ifsc_code.errors %}
+                                                <div class="invalid-feedback">{{ error }}</div>
+                                            {% endfor %}
+                                            <small class="form-text text-muted">11 character IFSC code (e.g., HDFC0001234)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
+                            <a href="{{ url_for('shop_dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <div>
+                                <button type="submit" name="save_and_continue" value="true" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-save me-1"></i> Save & Continue
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to show/hide payment sections based on selected payment method
+    function togglePaymentSections() {
+        const paymentMethod = document.getElementById('preferred_payment_method').value;
+        const upiSection = document.getElementById('upi-section');
+        const bankSection = document.getElementById('bank-section');
+        
+        // Show/hide UPI section
+        if (paymentMethod === 'upi' || paymentMethod === 'both') {
+            upiSection.style.display = 'block';
+        } else {
+            upiSection.style.display = 'none';
+        }
+        
+        // Show/hide Bank section
+        if (paymentMethod === 'bank_transfer' || paymentMethod === 'both') {
+            bankSection.style.display = 'block';
+        } else {
+            bankSection.style.display = 'none';
+        }
+    }
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle payment sections on page load
+        togglePaymentSections();
+        
+        // Add event listener for payment method change
+        document.getElementById('preferred_payment_method').addEventListener('change', togglePaymentSections);
+        
+        // Handle file input for logo and UPI QR code
+        document.querySelectorAll('input[type="file"]').forEach(function(input) {
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Find the closest parent form-group to append the preview
+                        const formGroup = e.target.closest('.form-group');
+                        // Remove any existing preview
+                        const existingPreview = formGroup.querySelector('.file-preview');
+                        if (existingPreview) {
+                            existingPreview.remove();
+                        }
+                        
+                        // Create and append the preview
+                        const previewDiv = document.createElement('div');
+                        previewDiv.className = 'file-preview mt-2';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail';
+                        img.style.maxHeight = '150px';
+                        
+                        previewDiv.appendChild(img);
+                        formGroup.appendChild(previewDiv);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Add some spacing between form groups */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Make file input buttons consistent */
+    .form-control[type="file"] {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    /* Style for the payment method selector */
+    #preferred_payment_method {
+        max-width: 400px;
+    }
+    
+    /* Style for the payment sections */
+    #upi-section, #bank-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    /* Style for form labels */
+    .form-label {
+        font-weight: 500;
+    }
+    
+    /* Style for the remove QR code checkbox */
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}

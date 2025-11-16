@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Services - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="dashboard-header">
+        <h1>Browse Services</h1>
+        <p>Find professional services from local providers</p>
+    </div>
+    
+    <div class="filters-section" style="margin: 2rem 0;">
+        <form method="GET" action="{{ url_for('services') }}" class="filter-form">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <input type="text" name="search" placeholder="Search services..." 
+                       value="{{ search }}" class="form-control" style="flex: 1; min-width: 200px;">
+                
+                <select name="category" class="form-control" style="min-width: 150px;">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="{{ url_for('services') }}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if services %}
+    <div class="products-grid">
+        {% for service in services %}
+        <div class="product-card fade-in">
+            <a href="{{ url_for('service_detail', service_id=service.id) }}">
+                {% if service.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" alt="{{ service.name }}">
+                {% else %}
+                <img src="https://via.placeholder.com/300x200?text=Service" alt="{{ service.name }}">
+                {% endif %}
+            </a>
+            <div class="product-info">
+                <h3>{{ service.name }}</h3>
+                <p class="product-description">{{ service.description[:100] }}...</p>
+                
+                {% if service.duration %}
+                <p style="color: var(--gray); font-size: 0.9rem;">
+                    ⏱️ Duration: {{ service.duration }}
+                </p>
+                {% endif %}
+                
+                {% if service.category %}
+                <span class="badge">{{ service.category }}</span>
+                {% endif %}
+                
+                <div class="product-footer">
+                    <span class="product-price">{{ service.price|format_currency }}</span>
+                    {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                    <button onclick="addServiceToCart({{ service.id }})" class="btn btn-primary btn-sm">
+                        Add to Cart
+                    </button>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login to Book</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No services found. Try adjusting your search.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function addServiceToCart(serviceId) {
+        try {
+            const response = await fetch(`/cart/add-service/${serviceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Service added to cart!');
+                updateCartCount(data.cart_count);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+            console.error(error);
+        }
+    }
+    
+    function updateCartCount(count) {
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'block' : 'none';
+        }
+    }
+</script>
+{% endblock %}
