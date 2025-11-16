@@ -21,10 +21,11 @@
                     <th>Duration</th>
                     <th>Status</th>
                     <th>Actions</th>
-
+                    
                 </tr>
             </thead>
             <tbody>
+                {% for service in services %}
                 <tr>
                     <td>
                         {% if service.image %}
