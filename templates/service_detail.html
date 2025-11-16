@@ -34,6 +34,53 @@
                 <strong>🏪 Provider:</strong> {{ service.shop.name }}
             </p>
             
+            <div class="provider-contact" style="background: var(--light-gray); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0;">
+                <h4 style="margin: 0 0 1rem 0; color: var(--primary);">📞 Contact Provider</h4>
+                
+                {% if service.shop.contact_phone %}
+                <p style="margin: 0.5rem 0;">
+                    <strong>📱 Phone:</strong> 
+                    <a href="tel:{{ service.shop.contact_phone }}" style="color: var(--primary); text-decoration: none;">
+                        {{ service.shop.contact_phone }}
+                    </a>
+                </p>
+                {% endif %}
+                
+                {% if service.shop.contact_whatsapp %}
+                <p style="margin: 0.5rem 0;">
+                    <strong>💬 WhatsApp:</strong> 
+                    <a href="https://wa.me/{{ service.shop.contact_whatsapp.replace('-', '').replace(' ', '') }}" 
+                       target="_blank" style="color: #25D366; text-decoration: none;">
+                        {{ service.shop.contact_whatsapp }}
+                    </a>
+                </p>
+                {% endif %}
+                
+                {% if service.shop.contact_email %}
+                <p style="margin: 0.5rem 0;">
+                    <strong>📧 Email:</strong> 
+                    <a href="mailto:{{ service.shop.contact_email }}" style="color: var(--primary); text-decoration: none;">
+                        {{ service.shop.contact_email }}
+                    </a>
+                </p>
+                {% endif %}
+                
+                {% if service.shop.address %}
+                <p style="margin: 0.5rem 0;">
+                    <strong>📍 Address:</strong> {{ service.shop.address }}
+                    {% if service.shop.city %}, {{ service.shop.city }}{% endif %}
+                    {% if service.shop.state %}, {{ service.shop.state }}{% endif %}
+                    {% if service.shop.pincode %} - {{ service.shop.pincode }}{% endif %}
+                </p>
+                {% endif %}
+                
+                {% if service.shop.opening_time and service.shop.closing_time %}
+                <p style="margin: 0.5rem 0;">
+                    <strong>🕐 Hours:</strong> {{ service.shop.opening_time.strftime('%I:%M %p') }} - {{ service.shop.closing_time.strftime('%I:%M %p') }}
+                </p>
+                {% endif %}
+            </div>
+            
             <div class="product-description" style="margin: 2rem 0;">
                 <h3>About this Service</h3>
                 <p>{{ service.description }}</p>

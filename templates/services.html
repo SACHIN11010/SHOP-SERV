@@ -43,6 +43,19 @@
                 <h3>{{ service.name }}</h3>
                 <p class="product-description">{{ service.description[:100] }}...</p>
                 
+                <p style="color: var(--gray); font-size: 0.9rem; margin: 0.5rem 0;">
+                    <strong>🏪 Provider:</strong> {{ service.shop.name }}
+                </p>
+                
+                {% if service.shop.contact_phone %}
+                <p style="color: var(--gray); font-size: 0.85rem; margin: 0.25rem 0;">
+                    <strong>📱:</strong> 
+                    <a href="tel:{{ service.shop.contact_phone }}" style="color: var(--primary); text-decoration: none; font-size: 0.85rem;">
+                        {{ service.shop.contact_phone }}
+                    </a>
+                </p>
+                {% endif %}
+                
                 {% if service.duration %}
                 <p style="color: var(--gray); font-size: 0.9rem;">
                     ⏱️ Duration: {{ service.duration }}

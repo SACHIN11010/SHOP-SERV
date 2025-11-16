@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}{{ shop.name }} - SHOP&SERV{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 20px;">
+    <div class="shop-header" style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        {% if shop.logo %}
+        <div style="flex-shrink: 0;">
+            <img src="{{ url_for('static', filename='uploads/' ~ shop.logo) }}" 
+                 alt="{{ shop.name }}" style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+        </div>
+        {% endif %}
+        
+        <div style="flex: 1;">
+            <h1>{{ shop.name }}</h1>
+            <p style="color: var(--gray); font-size: 1.1rem; margin: 1rem 0;">{{ shop.description }}</p>
+            
+            {% if shop.is_verified %}
+            <span class="badge" style="background-color: #28a745; margin-bottom: 1rem;">✓ Verified Shop</span>
+            {% endif %}
+            
+            {% if shop.service_type %}
+            <span class="badge">{{ shop.service_type }}</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="shop-contact" style="background: var(--light-gray); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+        <h3 style="margin: 0 0 1rem 0; color: var(--primary);">📞 Contact Information</h3>
+        
+        {% if shop.contact_phone %}
+        <p style="margin: 0.5rem 0;">
+            <strong>📱 Phone:</strong> 
+            <a href="tel:{{ shop.contact_phone }}" style="color: var(--primary); text-decoration: none;">
+                {{ shop.contact_phone }}
+            </a>
+        </p>
+        {% endif %}
+        
+        {% if shop.contact_whatsapp %}
+        <p style="margin: 0.5rem 0;">
+            <strong>💬 WhatsApp:</strong> 
+            <a href="https://wa.me/{{ shop.contact_whatsapp.replace('-', '').replace(' ', '') }}" 
+               target="_blank" style="color: #25D366; text-decoration: none;">
+                {{ shop.contact_whatsapp }}
+            </a>
+        </p>
+        {% endif %}
+        
+        {% if shop.contact_email %}
+        <p style="margin: 0.5rem 0;">
+            <strong>📧 Email:</strong> 
+            <a href="mailto:{{ shop.contact_email }}" style="color: var(--primary); text-decoration: none;">
+                {{ shop.contact_email }}
+            </a>
+        </p>
+        {% endif %}
+        
+        {% if shop.address %}
+        <p style="margin: 0.5rem 0;">
+            <strong>📍 Address:</strong> {{ shop.address }}
+            {% if shop.city %}, {{ shop.city }}{% endif %}
+            {% if shop.state %}, {{ shop.state }}{% endif %}
+            {% if shop.pincode %} - {{ shop.pincode }}{% endif %}
+        </p>
+        {% endif %}
+        
+        {% if shop.opening_time and shop.closing_time %}
+        <p style="margin: 0.5rem 0;">
+            <strong>🕐 Hours:</strong> {{ shop.opening_time.strftime('%I:%M %p') }} - {{ shop.closing_time.strftime('%I:%M %p') }}
+        </p>
+        {% endif %}
+    </div>
+    
+    <div class="shop-services">
+        <h2>Services Offered</h2>
+        
+        {% if services %}
+        <div class="products-grid">
+            {% for service in services %}
+            <div class="product-card fade-in">
+                <a href="{{ url_for('service_detail', service_id=service.id) }}">
+                    {% if service.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ service.image) }}" alt="{{ service.name }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/300x200?text=Service" alt="{{ service.name }}">
+                    {% endif %}
+                </a>
+                <div class="product-info">
+                    <h3>{{ service.name }}</h3>
+                    <p class="product-description">{{ service.description[:100] }}...</p>
+                    
+                    <p style="color: var(--gray); font-size: 0.9rem; margin: 0.5rem 0;">
+                        <strong>💰 Price:</strong> ₹{{ service.price }}
+                    </p>
+                    
+                    {% if service.duration %}
+                    <p style="color: var(--gray); font-size: 0.9rem;">
+                        ⏱️ Duration: {{ service.duration }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if service.category %}
+                    <span class="badge">{{ service.category }}</span>
+                    {% endif %}
+                    
+                    <div class="product-actions" style="margin-top: 1rem;">
+                        {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                        <button class="btn btn-primary btn-sm add-to-cart" data-service-id="{{ service.id }}">Add to Cart</button>
+                        {% endif %}
+                        <a href="{{ url_for('service_detail', service_id=service.id) }}" class="btn btn-secondary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-results" style="text-align: center; padding: 2rem;">
+            <h3>No services available</h3>
+            <p>This shop hasn't added any services yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

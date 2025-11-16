@@ -86,10 +86,44 @@ def services():
     return render_template('services.html', services=services, categories=categories, 
                          search=search, category=category)
 
+@app.route('/shops')
+def shops():
+    search = request.args.get('search', '')
+    city = request.args.get('city', '')
+    service_type = request.args.get('service_type', '')
+    
+    query = Shop.query.filter_by(is_active=True, is_approved=True)
+    
+    if search:
+        query = query.filter(Shop.name.ilike(f'%{search}%'))
+    if city:
+        query = query.filter(Shop.city.ilike(f'%{city}%'))
+    if service_type:
+        query = query.filter_by(service_type=service_type)
+    
+    shops = query.order_by(Shop.created_at.desc()).all()
+    
+    # Get unique cities and service types for filters
+    cities = db.session.query(Shop.city).distinct().all()
+    cities = [c[0] for c in cities if c[0]]
+    
+    service_types = db.session.query(Shop.service_type).distinct().all()
+    service_types = [s[0] for s in service_types if s[0]]
+    
+    return render_template('shops.html', shops=shops, cities=cities, service_types=service_types,
+                         search=search, city=city, service_type=service_type)
+
 @app.route('/service/<int:service_id>')
 def service_detail(service_id):
     service = Service.query.get_or_404(service_id)
     return render_template('service_detail.html', service=service)
+
+@app.route('/shop/<int:shop_id>')
+def shop_detail(shop_id):
+    shop = Shop.query.get_or_404(shop_id)
+    # Get shop's services
+    services = Service.query.filter_by(shop_id=shop_id, is_active=True).all()
+    return render_template('shop_detail.html', shop=shop, services=services)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
