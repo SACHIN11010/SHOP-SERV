@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Cancelled - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card border-warning">
+                <div class="card-body p-5">
+                    <div class="text-warning mb-4" style="font-size: 4rem;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h1 class="h3 mb-3">Payment Cancelled</h1>
+                    <p class="lead">Your payment was not completed.</p>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0">
+                            The payment was cancelled. No amount was charged to your account.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <a href="{{ url_for('cart.view') }}" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Back to Cart
+                        </a>
+                        <a href="{{ url_for('main.home') }}" class="btn btn-outline-secondary ml-2">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <p class="mb-0">
+                    <i class="fas fa-info-circle"></i> This is a demo payment system. No real money was involved.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

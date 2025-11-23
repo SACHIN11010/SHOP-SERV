@@ -39,14 +39,14 @@ def create_app(config_class='config.Config'):
         from flask_wtf.csrf import generate_csrf
         return {'csrf_token': generate_csrf}
         
-    # Import and register blueprints
-    from .main import main as main_blueprint
-    from .auth import auth as auth_blueprint
-    from .shop import shop as shop_blueprint
+    # Import and register blueprints from routes
+    from .routes.customer import customer as customer_blueprint
+    from .routes.payment_routes import payment as payment_blueprint
+    from .routes.cart_routes import cart as cart_blueprint
     
-    app.register_blueprint(main_blueprint)
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-    app.register_blueprint(shop_blueprint, url_prefix='/shop')
+    app.register_blueprint(customer_blueprint, url_prefix='/customer')
+    app.register_blueprint(payment_blueprint, url_prefix='/payment')
+    app.register_blueprint(cart_blueprint, url_prefix='/cart')
 
     # Configure login manager
     login_manager.login_view = 'auth.login'

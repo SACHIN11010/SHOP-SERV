@@ -74,20 +74,15 @@
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
-                    <!-- Simple Theme Toggle Button -->
-                    <button 
-                        id="theme-toggle" 
-                        class="p-2 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        type="button"
-                        title="Toggle dark/light mode"
-                    >
+                    <!-- Theme Toggle Button -->
+                    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
                         <i id="theme-icon" class="fas fa-moon"></i>
                         <span class="sr-only">Toggle theme</span>
                     </button>
                     
                     {% if current_user.is_authenticated %}
                         <!-- Shopping Cart -->
-                        <a href="{{ url_for('customer.cart') }}" class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 relative">
+                        <a href="{{ url_for('customer.cart') }}" class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span class="sr-only">View cart</span>
                             <i class="fas fa-shopping-cart h-6 w-6"></i>
                             {% if cart_count > 0 %}
@@ -136,35 +131,14 @@
         <!-- Mobile menu, show/hide based on menu state. -->
         <div class="sm:hidden" id="mobile-menu">
             <div class="pt-2 pb-3 space-y-1">
-                <!-- Mobile Theme Toggle -->
-                <div class="px-4 py-2">
-                    <button 
-                        id="mobile-theme-toggle" 
-                        class="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        type="button"
-                        aria-label="Toggle theme"
-                    >
-                        <span>Theme</span>
-                        <i class="fas fa-moon dark:fa-sun"></i>
-                    </button>
-                </div>
-                <!-- Mobile Theme Toggle -->
-                <div class="px-4 py-2 flex items-center">
-                    <span class="text-gray-500 mr-3">Theme:</span>
-                    <button id="mobile-theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
-                        <i id="mobile-theme-icon" class="fas fa-moon"></i>
-                        <span class="sr-only">Toggle theme</span>
-                    </button>
-                </div>
-                
                 <a href="{{ url_for('main.products') }}" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Products</a>
-                <a href="{{ url_for('main.services') }}" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Services</a>
+                <a href="{{ url_for('main.services') }}" class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Services</a>
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'shop_owner' %}
-                    <a href="{{ url_for('shop_owner.dashboard') }}" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">My Shop</a>
+                    <a href="{{ url_for('shop_owner.dashboard') }}" class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">My Shop</a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
-                    <a href="{{ url_for('admin.dashboard') }}" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Admin</a>
+                    <a href="{{ url_for('admin.dashboard') }}" class="border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Admin</a>
                     {% endif %}
                 {% endif %}
             </div>
@@ -275,7 +249,7 @@
     <!-- JavaScript -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/darkmode.js') }}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

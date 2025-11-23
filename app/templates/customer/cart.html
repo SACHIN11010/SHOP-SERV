@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cart - Shop&Serv{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Your Shopping Cart</h1>
+    
+    <div id="cart-container">
+        <!-- Cart items will be loaded here via JavaScript -->
+        <div class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p>Loading your cart...</p>
+        </div>
+            {% endfor %}
+        </div>
+        
+        <div class="border-t border-gray-200 mt-6 pt-6">
+            <div class="flex justify-end">
+                <div class="w-full md:w-1/3">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium cart-subtotal">₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="flex justify-between mb-4">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="font-medium">Free</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-4">
+                        <span>Total</span>
+                        <span class="cart-total">₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{{ url_for('customer.checkout') }}" 
+                           class="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">Your cart is empty</h3>
+        <p class="mt-1 text-gray-500">Start shopping to add items to your cart.</p>
+        <div class="mt-6">
+            <a href="{{ url_for('main.home') }}" class="text-blue-600 hover:text-blue-500 font-medium">
+                Continue Shopping
+                <span aria-hidden="true"> &rarr;</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 w-80"></div>
+            showToast('Cart updated successfully', 'success');
+        } else {
+            showToast(data.message || 'Failed to update cart', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating cart:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    }
+}
+
+// Remove item from cart
+async function removeCartItem(itemId, itemType) {
+    try {
+        const endpoint = `/api/cart/remove/${itemId}`;
+        const data = await makeRequest(endpoint, 'POST', {
+            item_type: itemType
+        });
+        
+        if (data.success) {
+            const itemElement = document.getElementById(
+                `${itemType === 'product' ? 'cart' : 'service-cart'}-item-${itemId}`
+            );
+            
+            if (itemElement) {
+                itemElement.remove();
+                updateCartTotals(data.cart);
+                showToast('Item removed from cart', 'success');
+                
+                // If cart is empty, reload the page
+                if (data.cart.item_count === 0) {
+                    window.location.reload();
+                }
+            }
+        } else {
+            showToast(data.message || 'Failed to remove item', 'error');
+        }
+    } catch (error) {
+        console.error('Error removing item:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    }
+}
+
+// Update the total for a specific item
+function updateItemTotal(itemId, itemType, quantity) {
+    const itemTotal = document.querySelector(`[data-item-id="${itemId}"].item-total`);
+    if (itemTotal) {
+        const price = parseFloat(itemTotal.dataset.price);
+        itemTotal.textContent = `₹${(price * quantity).toFixed(2)}`;
+    }
+}
+
+// Update cart totals in the UI
+function updateCartTotals(cartData) {
+    // Update subtotal
+    if (cartData.subtotal !== undefined) {
+        const subtotalElement = document.getElementById('cart-subtotal');
+        if (subtotalElement) {
+            subtotalElement.textContent = `₹${cartData.subtotal.toFixed(2)}`;
+        }
+    }
+    
+    // Update total
+    if (cartData.total !== undefined) {
+        const totalElement = document.getElementById('cart-total');
+        if (totalElement) {
+            totalElement.textContent = `₹${cartData.total.toFixed(2)}`;
+        }
+    }
+    
+    // Update item count in cart icon
+    if (cartData.item_count !== undefined) {
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            cartCountElement.textContent = cartData.item_count;
+            cartCountElement.classList.toggle('hidden', cartData.item_count === 0);
+        }
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `p-4 rounded-md shadow-lg ${
+        type === 'success' ? 'bg-green-100 text-green-800' : 
+        type === 'error' ? 'bg-red-100 text-red-800' :
+        'bg-blue-100 text-blue-800'
+    }`;
+    
+    toast.role = 'alert';
+    
+    // Add message and close button
+    toast.innerHTML = `
+        <span class="block sm:inline">${message}</span>
+        <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="document.getElementById('${toastId}').remove()">
+            <svg class="fill-current h-6 w-6 text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <title>Close</title>
+                <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+        </span>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        const toastElement = document.getElementById(toastId);
+        if (toastElement) {
+            toastElement.remove();
+        }
+    }, 5000);
+}
+
+// Function to get CSRF token
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
+// Function to make AJAX requests
+async function makeRequest(url, method = 'GET', data = {}) {
+    const options = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        credentials: 'same-origin'
+    };
+
+    if (method !== 'GET') {
+        options.body = JSON.stringify(data);
+    }
+
+    try {
+        const response = await fetch(url, options);
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+        return { success: false, message: 'Network error' };
+    }
+}
+
+// Initialize cart on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up CSRF token for AJAX requests
+    let csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    
+    // Event delegation for quantity updates
+    document.addEventListener('click', async function(e) {
+        // Handle quantity increase/decrease
+        if (e.target.matches('.update-quantity')) {
+            e.preventDefault();
+            const button = e.target;
+            const itemId = button.dataset.itemId;
+            const itemType = button.dataset.itemType;
+            const action = button.dataset.action;
+            
+            const quantityInput = document.getElementById(`quantity-${itemId}`);
+            let newQuantity = parseInt(quantityInput.value) || 1;
+            
+            if (action === 'increase') {
+                newQuantity++;
+            } else if (action === 'decrease' && newQuantity > 1) {
+                newQuantity--;
+            }
+            
+            // Update the input value
+            quantityInput.value = newQuantity;
+            
+            // Update the cart
+            await updateCartItem(itemId, itemType, newQuantity);
+        }
+        
+        // Handle remove item
+        if (e.target.closest('.remove-item')) {
+            e.preventDefault();
+            const button = e.target.closest('.remove-item');
+            const itemId = button.dataset.itemId;
+            const itemType = button.dataset.itemType;
+            
+            await removeCartItem(itemId, itemType);
+        }
+    });
+    
+    // Handle quantity input changes
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="number"][data-item-id]')) {
+            const input = e.target;
+            const itemId = input.dataset.itemId;
+            const itemType = input.dataset.itemType;
+            const newQuantity = parseInt(input.value) || 1;
+            
+            // Ensure quantity is at least 1
+            if (newQuantity < 1) {
+                input.value = 1;
+                return;
+            }
+            
+            // Update the cart
+            updateCartItem(itemId, itemType, newQuantity);
+        }
+    });
+    if (!csrfMeta) {
+        csrfMeta = document.createElement('meta');
+        csrfMeta.name = 'csrf-token';
+        csrfMeta.content = '{{ csrf_token() }}';
+        document.head.appendChild(csrfMeta);
+    }
+    
+    // Update cart count on page load
+    fetch('/api/cart')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCartTotals(data.cart);
+            }
+        })
+        .catch(error => console.error('Error fetching cart:', error));
+
+        // Event delegation for all cart actions
+    document.addEventListener('click', async function(e) {
+        // Handle quantity updates
+        const updateBtn = e.target.closest('.update-quantity');
+        if (updateBtn) {
+            e.preventDefault();
+            const itemId = updateBtn.dataset.itemId;
+            const itemType = updateBtn.dataset.itemType;
+            const action = updateBtn.dataset.action;
+            const input = document.querySelector(`input[data-item-id="${itemId}"][data-item-type="${itemType}"]`);
+            
+            if (input) {
+                let newQuantity = parseInt(input.value) || 1;
+                if (action === 'increase') {
+                    newQuantity++;
+                } else if (action === 'decrease') {
+                    newQuantity = Math.max(1, newQuantity - 1);
+                }
+                input.value = newQuantity;
+                await updateCartItem(itemId, itemType, newQuantity);
+            }
+        }
+
+        // Handle remove item
+        const removeBtn = e.target.closest('.remove-item');
+        if (removeBtn) {
+            e.preventDefault();
+            const itemId = removeBtn.dataset.itemId;
+            const itemType = removeBtn.dataset.itemType;
+            await removeCartItem(itemId, itemType);
+        }
+    });
+
+    // Handle direct input changes
+    document.addEventListener('change', async function(e) {
+        const quantityInput = e.target.closest('input[type="number"][data-item-id]');
+{% endblock %}

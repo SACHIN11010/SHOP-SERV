@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+        <!-- Product Images -->
+        <div class="mb-8 lg:mb-0">
+            <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                {% if product.image_url %}
+                <img src="{{ url_for('static', filename=product.image_url) }}" 
+                     alt="{{ product.name }}" 
+                     class="w-full h-auto max-h-96 object-contain">
+                {% else %}
+                <div class="w-full h-96 bg-gray-100 flex items-center justify-center">
+                    <span class="text-gray-400">No image available</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="lg:pl-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+            
+            <div class="flex items-center mb-4">
+                <span class="text-2xl font-bold text-indigo-600">${{ "%.2f"|format(product.price) }}</span>
+                {% if product.stock > 0 %}
+                <span class="ml-4 text-sm text-green-600">In Stock ({{ product.stock }} available)</span>
+                {% else %}
+                <span class="ml-4 text-sm text-red-600">Out of Stock</span>
+                {% endif %}
+            </div>
+
+            {% if product.category %}
+            <div class="mb-4">
+                <span class="text-sm text-gray-500">Category: </span>
+                <a href="{{ url_for('products', category=product.category) }}" 
+                   class="text-indigo-600 hover:underline">
+                    {{ product.category }}
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="mb-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-2">Description</h2>
+                <p class="text-gray-700">{{ product.description or 'No description available.' }}</p>
+            </div>
+
+            {% if product.stock > 0 %}
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="flex items-center border border-gray-300 rounded-md" data-max-stock="{{ product.stock }}">
+                    <button type="button" class="decrement-btn px-3 py-1 text-gray-600 hover:bg-gray-100">-</button>
+                    <input type="number" id="quantity" min="1" max="{{ product.stock }}" value="1" 
+                           class="w-16 text-center border-0 focus:ring-0 quantity-input">
+                    <button type="button" class="increment-btn px-3 py-1 text-gray-600 hover:bg-gray-100">+</button>
+                </div>
+                <button class="add-to-cart bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors" 
+                        data-product-id="{{ product.id }}">
+                    Add to Cart
+                </button>
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            This product is currently out of stock. Please check back later.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="border-t border-gray-200 pt-4">
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="flex-shrink-0 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    Sold by: 
+                    <a href="{{ url_for('shop_detail', shop_id=product.shop_id) }}" class="ml-1 text-indigo-600 hover:underline">
+                        {{ product.shop.name }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Quantity controls
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quantity increment/decrement buttons
+        document.querySelectorAll('.increment-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('.flex.items-center');
+                const input = container.querySelector('.quantity-input');
+                const max = parseInt(container.dataset.maxStock) || 999;
+                let value = parseInt(input.value) || 0;
+                if (value < max) {
+                    input.value = value + 1;
+                    updateAddToCartQuantity(input);
+                }
+            });
+        });
+
+        document.querySelectorAll('.decrement-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.nextElementSibling;
+                let value = parseInt(input.value) || 1;
+                if (value > 1) {
+                    input.value = value - 1;
+                    updateAddToCartQuantity(input);
+                }
+            });
+        });
+
+        // Direct input change
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const max = parseInt(this.max) || 999;
+                let value = parseInt(this.value) || 1;
+                if (value < 1) this.value = 1;
+                if (value > max) this.value = max;
+                updateAddToCartQuantity(this);
+            });
+        });
+
+        // Update add to cart button's data-quantity attribute
+        function updateAddToCartQuantity(input) {
+            const addToCartBtn = document.querySelector('.add-to-cart');
+            if (addToCartBtn) {
+                addToCartBtn.setAttribute('data-quantity', input.value);
+            }
+        }
+
+        // Set initial quantity for add to cart button
+        const initialInput = document.querySelector('.quantity-input');
+        const addToCartBtn = document.querySelector('.add-to-cart');
+        if (initialInput && addToCartBtn) {
+            addToCartBtn.setAttribute('data-quantity', initialInput.value);
+        }
+    });
+
+    // Add to Cart functionality is handled by cart_actions.js
+</script>
+{% endblock %}

@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cart - Shop&Serv{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quantity-btn {
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e5e7eb;
+        background-color: #f9fafb;
+    }
+    .quantity-input {
+        width: 3rem;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        border-left: none;
+        border-right: none;
+        -webkit-appearance: textfield;
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Your Shopping Cart</h1>
+    
+    <div id="cart-container">
+        <!-- Cart items will be loaded here via JavaScript -->
+        <div class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p>Loading your cart...</p>
+        </div>
+    </div>
+    
+    <div id="empty-cart-message" class="hidden text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">Your cart is empty</h3>
+        <p class="mt-1 text-gray-500">Start shopping to add items to your cart.</p>
+        <div class="mt-6">
+            <a href="{{ url_for('main.index') }}" class="text-blue-600 hover:text-blue-500 font-medium">
+                Continue Shopping
+                <span aria-hidden="true"> &rarr;</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Order Summary Template -->
+    <template id="order-summary-template">
+        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+            <div class="flex justify-between mb-2">
+                <span>Subtotal</span>
+                <span>₹<span id="cart-subtotal">0.00</span></span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span>Shipping</span>
+                <span>Free</span>
+            </div>
+            <div class="border-t border-gray-200 my-4"></div>
+            <div class="flex justify-between text-lg font-semibold">
+                <span>Total</span>
+                <span>₹<span id="cart-total">0.00</span></span>
+            </div>
+            <a href="{{ url_for('customer.checkout') }}" 
+               class="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200 text-center block">
+                Proceed to Checkout
+            </a>
+        </div>
+    </template>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 w-80"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Cart functionality
+class CartManager {
+    constructor() {
+        this.cartContainer = document.getElementById('cart-container');
+        this.emptyCartMessage = document.getElementById('empty-cart-message');
+        this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        
+        this.initEventListeners();
+        this.loadCart();
+    }
+    
+    initEventListeners() {
+        // Event delegation for cart actions
+        document.addEventListener('click', (e) => {
+            // Handle remove from cart
+            const removeBtn = e.target.closest('.remove-from-cart');
+            if (removeBtn) {
+                e.preventDefault();
+                const { itemId, itemType } = removeBtn.dataset;
+                this.removeFromCart(itemId, itemType);
+            }
+            
+            // Handle quantity updates
+            const qtyBtn = e.target.closest('.update-quantity');
+            if (qtyBtn) {
+                e.preventDefault();
+                const { itemId, itemType, action } = qtyBtn.dataset;
+                const input = qtyBtn.parentElement.querySelector('input[type="number"]');
+                if (input) {
+                    let newQty = parseInt(input.value) || 1;
+                    if (action === 'increase') {
+                        newQty++;
+                    } else if (action === 'decrease' && newQty > 1) {
+                        newQty--;
+                    }
+                    input.value = newQty;
+                    this.updateCartItem(itemId, itemType, newQty);
+                }
+            }
+        });
+        
+        // Handle direct quantity input
+        document.addEventListener('change', (e) => {
+            const input = e.target;
+            if (input.matches('.quantity-input')) {
+                const { itemId, itemType } = input.dataset;
+                const newQty = Math.max(1, parseInt(input.value) || 1);
+                input.value = newQty; // Ensure minimum quantity of 1
+                this.updateCartItem(itemId, itemType, newQty);
+            }
+        });
+    }
+    
+    async loadCart() {
+        try {
+            const response = await fetch('/api/cart', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': this.csrfToken
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.cart) {
+                this.renderCart(data.cart);
+            } else {
+                this.showEmptyCart();
+            }
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            this.showToast('Failed to load cart. Please refresh the page.', 'error');
+        }
+    }
+    
+    renderCart(cartData) {
+        if (!cartData.item_count) {
+            this.showEmptyCart();
+            return;
+        }
+        
+        let cartHTML = '';
+        
+        // Render products
+        if (cartData.products && cartData.products.length > 0) {
+            cartHTML += '<div class="space-y-6">';
+            cartData.products.forEach(item => {
+                cartHTML += this.createCartItemHTML(item, 'product');
+            });
+            cartHTML += '</div>';
+        }
+        
+        // Render services
+        if (cartData.services && cartData.services.length > 0) {
+            cartHTML += '<div class="space-y-6 mt-8">';
+            cartData.services.forEach(item => {
+                cartHTML += this.createCartItemHTML(item, 'service');
+            });
+            cartHTML += '</div>';
+        }
+        
+        // Add order summary
+        const orderSummary = document.getElementById('order-summary-template').innerHTML;
+        cartHTML += orderSummary;
+        
+        this.cartContainer.innerHTML = cartHTML;
+        this.updateCartTotals(cartData);
+        this.emptyCartMessage.classList.add('hidden');
+    }
+    
+    createCartItemHTML(item, type) {
+        const maxQty = item.max_quantity || 100;
+        const itemTotal = (item.price * item.quantity).toFixed(2);
+        
+        return `
+        <div id="${type}-item-${item.id}" class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-4 flex flex-col md:flex-row">
+                <div class="w-full md:w-1/4 mb-4 md:mb-0">
+                    <img src="${item.image || '/static/images/placeholder-product.jpg'}" 
+                         alt="${item.name}" 
+                         class="w-full h-48 object-cover rounded">
+                </div>
+                <div class="w-full md:w-3/4 md:pl-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-semibold">${item.name}</h3>
+                            <p class="text-gray-600 line-clamp-2">${item.description || ''}</p>
+                            <p class="text-lg font-semibold mt-2">₹${itemTotal}</p>
+                            <p class="text-sm text-gray-500">₹${item.price.toFixed(2)} each</p>
+                        </div>
+                        <button class="remove-from-cart text-red-500 hover:text-red-700"
+                                data-item-id="${item.id}" 
+                                data-item-type="${type}">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    <div class="mt-4 flex items-center">
+                        <button class="update-quantity quantity-btn rounded-l" 
+                                data-action="decrease" 
+                                data-item-id="${item.id}" 
+                                data-item-type="${type}">
+                            -
+                        </button>
+                        <input type="number" 
+                               class="quantity-input" 
+                               value="${item.quantity}" 
+                               min="1" 
+                               max="${maxQty}"
+                               data-item-id="${item.id}" 
+                               data-item-type="${type}">
+                        <button class="update-quantity quantity-btn rounded-r" 
+                                data-action="increase" 
+                                data-item-id="${item.id}" 
+                                data-item-type="${type}"
+                                ${item.quantity >= maxQty ? 'disabled' : ''}>
+                            +
+                        </button>
+                        <span class="ml-2 text-sm text-gray-500">
+                            ${maxQty} available
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+    
+    async updateCartItem(itemId, itemType, quantity) {
+        try {
+            const response = await fetch(`/api/cart/update/${itemType}/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.csrfToken
+                },
+                body: JSON.stringify({ quantity })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateCartTotals(data.cart);
+                this.showToast('Cart updated', 'success');
+                
+                // Update the specific item's UI
+                const itemElement = document.getElementById(`${itemType}-item-${itemId}`);
+                if (itemElement) {
+                    const totalElement = itemElement.querySelector('.text-lg.font-semibold');
+                    if (totalElement) {
+                        const price = parseFloat(totalElement.textContent.replace('₹', '')) / 
+                                    (parseInt(itemElement.querySelector('input').value) || 1);
+                        totalElement.textContent = `₹${(price * quantity).toFixed(2)}`;
+                    }
+                }
+                
+                // Update cart count in navbar
+                this.updateCartCount(data.cart.item_count);
+                
+                return true;
+            } else {
+                this.showToast(data.message || 'Failed to update cart', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error updating cart item:', error);
+            this.showToast('An error occurred. Please try again.', 'error');
+            return false;
+        }
+    }
+    
+    async removeFromCart(itemId, itemType) {
+        if (!confirm('Are you sure you want to remove this item from your cart?')) {
+            return false;
+        }
+        
+        try {
+            const response = await fetch(`/api/cart/remove/${itemType}/${itemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.csrfToken
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const itemElement = document.getElementById(`${itemType}-item-${itemId}`);
+                if (itemElement) {
+                    itemElement.remove();
+                }
+                
+                if (data.cart.item_count === 0) {
+                    this.showEmptyCart();
+                } else {
+                    this.updateCartTotals(data.cart);
+                }
+                
+                // Update cart count in navbar
+                this.updateCartCount(data.cart.item_count);
+                
+                this.showToast('Item removed from cart', 'success');
+                return true;
+            } else {
+                this.showToast(data.message || 'Failed to remove item', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+            this.showToast('An error occurred. Please try again.', 'error');
+            return false;
+        }
+    }
+    
+    updateCartTotals(cartData) {
+        // Update subtotal
+        if (cartData.subtotal !== undefined) {
+            const subtotalElement = document.getElementById('cart-subtotal');
+            if (subtotalElement) {
+                subtotalElement.textContent = cartData.subtotal.toFixed(2);
+            }
+        }
+        
+        // Update total
+        if (cartData.total !== undefined) {
+            const totalElement = document.getElementById('cart-total');
+            if (totalElement) {
+                totalElement.textContent = cartData.total.toFixed(2);
+            }
+        }
+    }
+    
+    updateCartCount(count) {
+        const cartCountElements = document.querySelectorAll('.cart-count');
+        cartCountElements.forEach(el => {
+            el.textContent = count;
+            el.classList.toggle('hidden', count === 0);
+        });
+    }
+    
+    showEmptyCart() {
+        this.cartContainer.classList.add('hidden');
+        this.emptyCartMessage.classList.remove('hidden');
+    }
+    
+    showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        const toastId = 'toast-' + Date.now();
+        toast.id = toastId;
+        
+        const typeClasses = {
+            success: 'bg-green-100 text-green-800',
+            error: 'bg-red-100 text-red-800',
+            info: 'bg-blue-100 text-blue-800'
+        };
+        
+        toast.className = `p-4 rounded-md shadow-lg ${typeClasses[type] || typeClasses.info}`;
+        toast.role = 'alert';
+        
+        toast.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
+                    <span class="ml-2">${message}</span>
+                </div>
+                <button type="button" class="ml-4 text-gray-500 hover:text-gray-700" 
+                        onclick="document.getElementById('${toastId}').remove()">
+                    <span class="sr-only">Close</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                toastElement.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Initialize cart when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize on the cart page
+    if (document.getElementById('cart-container')) {
+        new CartManager();
+    }
+});
+</script>
+{% endblock %}

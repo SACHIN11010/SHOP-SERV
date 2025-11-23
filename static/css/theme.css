@@ -1,0 +1,227 @@
+/* Light Theme (Default) */
+:root {
+  /* Base Colors */
+  --bg-main: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-elevated: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --button-bg: #4f46e5;
+  --button-text: #ffffff;
+  --hover-bg: #f3f4f6;
+  --hover-text: #1f2937;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --gradient-secondary: linear-gradient(135deg, #8b5cf6, #d946ef);
+  
+  /* Specific Components */
+  --nav-bg: #ffffff;
+  --nav-text: #111827;
+  --nav-hover: #f3f4f6;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #111827;
+  --footer-bg: #f9fafb;
+  --footer-text: #4b5563;
+  
+  /* Theme Toggle Button */
+  --theme-toggle-bg: #f3f4f6;
+  --theme-toggle-text: #4b5563;
+  --theme-toggle-hover: #e5e7eb;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  /* Base Colors */
+  --bg-main: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-elevated: #1e293b;
+  --card-bg: rgba(30, 41, 59, 0.8);
+  --card-border: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --button-bg: #4f46e5;
+  --button-text: #ffffff;
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --hover-text: #ffffff;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  
+  /* Theme Toggle Button - Dark Mode */
+  --theme-toggle-bg: #334155;
+  --theme-toggle-text: #e2e8f0;
+  --theme-toggle-hover: #475569;
+  --gradient-primary: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  --gradient-secondary: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  
+  /* Specific Components */
+  --nav-bg: #0f172a;
+  --nav-text: #f8fafc;
+  --nav-hover: #1e293b;
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-text: #f8fafc;
+  --footer-bg: #0f172a;
+  --footer-text: #94a3b8;
+}
+
+/* Apply theme colors to elements */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar */
+nav {
+  background-color: var(--nav-bg);
+  color: var(--nav-text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Cards */
+.bg-white {
+  background-color: var(--card-bg) !important;
+  border-color: var(--card-border);
+}
+
+/* Buttons */
+.bg-indigo-600 {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: all 0.3s ease;
+}
+
+.bg-indigo-600:hover {
+  background-color: var(--button-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Inputs */
+input, textarea, select {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+/* Links */
+a {
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--button-bg);
+}
+
+/* Footer */
+footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  background: var(--theme-toggle-bg);
+  color: var(--theme-toggle-text);
+  border: 2px solid var(--theme-toggle-hover);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 50; /* Ensure it's above other elements */
+  position: relative;
+}
+
+.theme-toggle:hover {
+  background: var(--theme-toggle-hover);
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+  border-color: var(--theme-toggle-text);
+}
+
+.theme-toggle i {
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+/* Ensure the toggle is visible in the mobile menu */
+#mobile-menu .theme-toggle {
+  margin: 0.5rem 0;
+  background: var(--theme-toggle-bg);
+  color: var(--theme-toggle-text);
+  border: 2px solid var(--theme-toggle-hover);
+}
+
+/* Add animation to the icon */
+.theme-toggle i.fa-sun {
+  color: #f59e0b; /* Amber-500 */
+}
+
+.theme-toggle i.fa-moon {
+  color: #4b5563; /* Gray-600 */
+}
+
+/* Add a subtle pulse animation when theme changes */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.theme-toggle.animate i {
+  animation: pulse 0.5s ease-in-out;
+}
+
+/* Dark mode specific styles */
+[data-theme="dark"] .bg-white {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .bg-gray-50 {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-gray-700 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .hover\:bg-gray-50:hover {
+  background-color: var(--hover-bg) !important;
+  color: var(--hover-text) !important;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}

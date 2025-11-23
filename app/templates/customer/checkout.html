@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block title %}Checkout - Shop&Serv{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Order Summary -->
+        <div class="md:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+            
+            <!-- Cart Items -->
+            <div class="space-y-4 mb-6">
+                {% for item in products %}
+                <div class="flex items-center justify-between border-b pb-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ url_for('static', filename=item.image) }}" 
+                             alt="{{ item.name }}" 
+                             class="w-20 h-20 object-cover rounded">
+                        <div>
+                            <h3 class="font-medium">{{ item.name }}</h3>
+                            <p class="text-gray-600 text-sm">Qty: {{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    <div class="font-medium">₹{{ "%.2f"|format(item.price * item.quantity) }}</div>
+                </div>
+                {% endfor %}
+                
+                {% for item in services %}
+                <div class="flex items-center justify-between border-b pb-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ url_for('static', filename=item.image) }}" 
+                             alt="{{ item.name }}" 
+                             class="w-20 h-20 object-cover rounded">
+                        <div>
+                            <h3 class="font-medium">{{ item.name }}</h3>
+                            <p class="text-gray-600 text-sm">Qty: {{ item.quantity }}</p>
+                        </div>
+                    </div>
+                    <div class="font-medium">₹{{ "%.2f"|format(item.price * item.quantity) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Delivery Address -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Delivery Address</h3>
+                <div class="border rounded-lg p-4">
+                    <p class="font-medium">{{ current_user.full_name }}</p>
+                    <p class="text-gray-600">123, Main Street</p>
+                    <p class="text-gray-600">Mumbai, Maharashtra 400001</p>
+                    <p class="text-gray-600">Phone: {{ current_user.phone or 'Not provided' }}</p>
+                    <button class="text-blue-600 text-sm mt-2">Change Address</button>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div>
+                <h3 class="text-lg font-medium mb-4">Payment Method</h3>
+                <form id="payment-form" method="POST" action="{{ url_for('customer.checkout') }}">
+                    {{ form.hidden_tag() }}  <!-- CSRF token -->
+                    {% if form.errors %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            <p class="font-bold">Error</p>
+                            {% for field, errors in form.errors.items() %}
+                                {% for error in errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center p-4 border rounded-lg">
+                            <input id="cod" name="payment_method" type="radio" value="cod" class="h-5 w-5 text-blue-600" checked>
+                            <label for="cod" class="ml-3">
+                                <span class="block text-sm font-medium">Cash on Delivery (COD)</span>
+                                <span class="block text-sm text-gray-500">Pay when you receive your order</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center p-4 border rounded-lg">
+                            <input id="card" name="payment_method" type="radio" value="card" class="h-5 w-5 text-blue-600">
+                            <label for="card" class="ml-3">
+                                <span class="block text-sm font-medium">Credit/Debit Card</span>
+                                <span class="block text-sm text-gray-500">Pay securely using your card</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center p-4 border rounded-lg">
+                            <input id="upi" name="payment_method" type="radio" value="upi" class="h-5 w-5 text-blue-600">
+                            <label for="upi" class="ml-3">
+                                <span class="block text-sm font-medium">UPI / QR Code</span>
+                                <span class="block text-sm text-gray-500">Pay using any UPI app</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Information -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-2">Shipping Information</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
+                                <input type="text" id="shipping_address" name="shipping_address" required
+                                       class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       value="{{ current_user.address or '' }}">
+                            </div>
+                            <div>
+                                <label for="shipping_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input type="tel" id="shipping_phone" name="shipping_phone" required
+                                       class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       value="{{ current_user.phone or '' }}">
+                            </div>
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Order Notes (Optional)</label>
+                                <textarea id="notes" name="notes" rows="2"
+                                          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Order Total -->
+        <div class="md:col-span-1">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-4">Order Total</h2>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span>₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery Fee</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="border-t pt-3 flex justify-between font-medium">
+                        <span>Total</span>
+                        <span>₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-500">
+                    <p class="mb-2">By placing your order, you agree to our <a href="#" class="text-blue-600">Terms of Service</a> and <a href="#" class="text-blue-600">Privacy Policy</a>.</p>
+                    <p>Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('payment-form');
+    
+    // Handle form submission
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Basic client-side validation
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            const address = document.getElementById('shipping_address');
+            const phone = document.getElementById('shipping_phone');
+            
+            // Reset previous error states
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => {
+                el.classList.remove('border-red-500');
+            });
+            
+            let isValid = true;
+            
+            // Validate payment method
+            if (!paymentMethod) {
+                showError('payment_method', 'Please select a payment method');
+                isValid = false;
+            }
+            
+            // Validate address
+            if (!address.value.trim()) {
+                showError('shipping_address', 'Please enter a shipping address');
+                isValid = false;
+            } else if (address.value.trim().length < 10) {
+                showError('shipping_address', 'Address must be at least 10 characters long');
+                isValid = false;
+            }
+            
+            // Validate phone
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phone.value.trim()) {
+                showError('shipping_phone', 'Please enter a phone number');
+                isValid = false;
+            } else if (!phoneRegex.test(phone.value.trim())) {
+                showError('shipping_phone', 'Please enter a valid 10-digit phone number');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Disable the submit button to prevent double submission
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Processing...';
+            }
+        });
+    }
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Client-side validation
+            const shippingAddress = document.getElementById('shipping_address');
+            const phone = document.getElementById('shipping_phone');
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            
+            let isValid = true;
+            
+            // Reset error states
+            [shippingAddress, phone].forEach(field => {
+                field.classList.remove('border-red-500');
+                field.nextElementSibling?.remove();
+            });
+            
+            // Validate shipping address
+            if (!shippingAddress.value.trim()) {
+                showError(shippingAddress, 'Please enter a shipping address');
+                isValid = false;
+            }
+            
+            // Validate phone number
+            if (!phone.value.trim()) {
+                showError(phone, 'Please enter a phone number');
+                isValid = false;
+            } else if (!/^[0-9]{10}$/.test(phone.value.trim())) {
+                showError(phone, 'Please enter a valid 10-digit phone number');
+                isValid = false;
+            }
+            
+            // Validate payment method
+            if (!paymentMethod) {
+                const paymentContainer = document.querySelector('.payment-methods');
+                if (paymentContainer) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-red-600 text-sm mt-1';
+                    errorDiv.textContent = 'Please select a payment method';
+                    paymentContainer.appendChild(errorDiv);
+                }
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    }
+    
+    function showError(field, message) {
+        field.classList.add('border-red-500');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'text-red-600 text-sm mt-1';
+        errorDiv.textContent = message;
+        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+    }
+});
+</script>
+{% endblock %}
